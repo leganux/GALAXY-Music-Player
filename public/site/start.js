@@ -13,7 +13,7 @@ let getFilesStart = async function () {
             redirect: "follow"
         };
         HoldOn.open()
-        let response = await fetch("/api/files/?where=[banned]=false", requestOptions)
+        let response = await fetch("/api/files/", requestOptions)
         let data = await response.json()
         HoldOn.close()
         let newData = []

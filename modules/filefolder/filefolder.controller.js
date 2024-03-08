@@ -27,7 +27,8 @@ let aggregate_pipeline = []
 const filesModel = require('./filefolder.model.js');
 const { existsSync } = require('fs');
 
-
+let total = 0
+let current = 0
 async function scanFilesRecursive(folderPath, fileExtensions, depth = 0) {
     try {
         if (depth > 4) {
@@ -43,11 +44,12 @@ async function scanFilesRecursive(folderPath, fileExtensions, depth = 0) {
         if (folderPath.includes('node_modules') || folderPath.includes('/.')) {
             return [];
         }
-
+        current = 0
+        total = files.length
         for (const file of files) {
             const filePath = path.join(folderPath, file);
             const stats = await fs.stat(filePath);
-
+            current++
             let SaveFile = {
                 title: '',
                 path: '',
@@ -90,11 +92,11 @@ async function scanFilesRecursive(folderPath, fileExtensions, depth = 0) {
                             album: metadata.album || metadata.title || '',
                             date: metadata.originalYear || metadata.year || metadata.date || metadata.creation_time || 'Unclasified',
                             artist: metadata.artist || metadata.album_artist || 'Unclasified',
-                            description: metadata.description || metadata.comment || metadata.label || 'Unclasified',
+                            description: metadata.description || metadata.label || 'Unclasified',
                             tags: metadata.tags || 'Unclasified',
                             extension: extension,
-                            full_meta: JSON.stringify(metadata),
-                            picture: metadata.image ? JSON.stringify(metadata.image) : null,
+                            //full_meta: JSON.stringify(metadata),
+                            //picture: metadata.image ? JSON.stringify(metadata.image) : null,
                             track: metadata.trackNumber || metadata.track || 'Unclasified',
                             composer: metadata.composer || 'Unclasified',
                             publisher: metadata.publisher || 'Unclasified',
@@ -109,12 +111,12 @@ async function scanFilesRecursive(folderPath, fileExtensions, depth = 0) {
                             album: 'Unclasified',
                             date: 'Unclasified',
                             artist: 'Unclasified',
-                            
+
                             description: 'Unclasified',
                             tags: 'Unclasified',
                             extension: extension,
-                            full_meta: '',
-                            picture: 'Unclasified',
+
+
                             track: 'Unclasified',
                         }
                     }
@@ -167,7 +169,7 @@ async function extractMetadata(filePath) {
             metadata = {};
         }
 
-        console.log('FILE metadata:', metadata, ' - Path:', filePath);
+        console.log(' - Path:', filePath, current, total);
         return metadata;
     } catch (e) {
         console.log('Error en metadata', filePath);
