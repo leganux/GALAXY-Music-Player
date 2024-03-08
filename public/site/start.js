@@ -23,11 +23,13 @@ let getFilesStart = async function () {
             return
         }
 
+        let index = 0
         for (let item of data.data) {
+
             newData.push([
                 item._id,
                 item.path,
-                '<button id="' + item._id + '" class="song_details" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Song Details"  ><i class="fa-solid fa-music"></i> </button> <button id="' + item._id + '" class="song_play" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Play Song"  ><i class="fa-solid fa-play"></i> </button>',
+                '<button id="' + index + '" class="song_details" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Song Details"  ><i class="fa-solid fa-music"></i> </button> <button id="' + index + '" class="song_play" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Play Song"  ><i class="fa-solid fa-play"></i> </button>',
                 item.title,
                 item.gender,
                 item.artist,
@@ -40,6 +42,7 @@ let getFilesStart = async function () {
                 item.liked,
                 item.banned,
             ])
+            index++
 
 
         }
@@ -78,6 +81,7 @@ let getFilesStart = async function () {
                 if (event.detail === 2) { // Verificar si es un doble clic
                     var row = coords.row; // Obtener el índice de la fila
                     songActual = row
+                    stop()
                     play()
                 }
             },
@@ -413,6 +417,12 @@ $(document).ready(async function () {
     })
     $(document.body).on('click', '.item_folder', function () {
         let value = $(this).attr('element')
+    })
+
+    $(document.body).on('click', '.song_play', function () {
+        stop()
+        songActual = $(this).attr('id')
+        play()
     })
 
 
