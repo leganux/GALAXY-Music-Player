@@ -1,0 +1,19 @@
+if toJS
+    textarea(stye="display:none; rows:5;")#toJS !{toJS}
+    script.
+        let textarea = document.getElementById('toJS');
+        let jsonString = textarea.value;
+        try {
+            let jsonObject = JSON.parse(jsonString);
+            for (let [key, val] of Object.entries(jsonObject)) {
+                window['$n_' + key] = val
+            }
+            textarea.parentNode.removeChild(textarea);
+        } catch (error) {
+            console.error('Error: Invalid JSON format');
+        }
+
+if scripts
+    each val in scripts
+        script(src=val + '?v=' + (Math.ceil(Math.random() * 1000)))
+
