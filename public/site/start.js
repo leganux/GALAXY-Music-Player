@@ -1,10 +1,47 @@
-
-
 let hot
 let isPlay = false
 let isPause = false
 let isStop = true
 let songActual = 0
+let handSomeData = []
+
+function convertirSegundos(segundos) {
+    const dias = Math.floor(segundos / (3600 * 24));
+    const horas = Math.floor((segundos % (3600 * 24)) / 3600);
+    const minutos = Math.floor((segundos % 3600) / 60);
+    const segundosRestantes = segundos % 60;
+
+    return {dias, horas, minutos, segundos: segundosRestantes};
+}
+
+let formatDataData = function (data) {
+    let newData = []
+
+    let index = 0
+    for (let item of data) {
+
+        newData.push([
+            item._id,
+            item.path,
+            '<button id="' + index + '" class="song_details" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Song Details"  ><i class="fa-solid fa-music"></i> </button> <button id="' + index + '" class="song_play" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Play Song"  ><i class="fa-solid fa-play"></i> </button>',
+            item.title,
+            item.gender,
+            item.artist,
+            item.album,
+            item.description,
+            item.tags,
+            item.composer,
+            item.track,
+            item.publisher,
+            item.liked,
+            item.banned,
+        ])
+        index++
+
+
+    }
+    return newData
+}
 
 let getFilesStart = async function () {
     try {
@@ -16,41 +53,25 @@ let getFilesStart = async function () {
         let response = await fetch("/api/files/", requestOptions)
         let data = await response.json()
         HoldOn.close()
-        let newData = []
+
 
         if (data.data.length == 0) {
             $('#btn_scan_music').click()
             return
         }
 
-        let index = 0
-        for (let item of data.data) {
+        let length = data.data.length
+        let time = length * 220
+        let times = convertirSegundos(time)
+        $('#label_songs_count').text(length + ' tracks ~ ' + times.dias + ' days ' + times.horas + ' hours ' + times.minutos + ' minutes')
 
-            newData.push([
-                item._id,
-                item.path,
-                '<button id="' + index + '" class="song_details" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Song Details"  ><i class="fa-solid fa-music"></i> </button> <button id="' + index + '" class="song_play" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Play Song"  ><i class="fa-solid fa-play"></i> </button>',
-                item.title,
-                item.gender,
-                item.artist,
-                item.album,
-                item.description,
-                item.tags,
-                item.coposer,
-                item.track,
-                item.publisher,
-                item.liked,
-                item.banned,
-            ])
-            index++
+        handSomeData = formatDataData(data.data)
 
-
-        }
 
         var container = document.getElementById('hot');
         hot = new Handsontable(container, {
             licenseKey: 'non-commercial-and-evaluation',
-            data: newData,
+            data: handSomeData,
             colHeaders: customColHeaders,
             hiddenColumns: {
                 columns: [0, 1], // Índice de la columna que se oculta
@@ -69,8 +90,8 @@ let getFilesStart = async function () {
                 {},
                 {},
                 {},
-                { type: 'checkbox' },
-                { type: 'checkbox' }
+                {type: 'checkbox'},
+                {type: 'checkbox'}
             ],
             width: '100%',
 
@@ -118,7 +139,6 @@ let getFilesStart = async function () {
     } catch (e) {
         console.error(e);
     }
-
 
 
 }
@@ -281,6 +301,7 @@ function play() {
             return
         }
         $('#label_sing_playing').text(data[3])
+        $('#label_song_path').text(data[1])
         $('#song_player').html('<source src="' + '/api/files/getFileToPlay?uri=' + encodeURIComponent(data[1]) + '" type="audio/ogg" id="audioSource_">')
         audio.load();
         audio.currentTime = 0;
@@ -363,28 +384,11 @@ $(document).ready(async function () {
         audio.volume = volume / 100
 
     })
-
     $('#range_song').click(function () {
         var newPosition = $(this).val() / 100 * audio.duration;
         audio.currentTime = newPosition;
 
     })
-
-
-    $('#btn_repeat').click(function () { })
-    $('#btn_shuffle').click(function () { })
-    $('#btn_search').click(function () { })
-    $('#input_search').change(function () { })
-    $('#btn_add_library').click(function () { })
-    $('#btn_add_firend').click(function () { })
-    $('#btn_share_library').click(function () { })
-    $('#btn_add_playlist').click(function () { })
-    $('#btn_add_folder').click(function () { })
-    $('#btn_back').click(function () { })
-    $('#btn_next_songs').click(function () { })
-    $('#btn_view_list').click(function () { })
-    $('#btn_view_icons').click(function () { })
-    $('#btn_configure').click(function () { })
     $('#btn_scan_music').click(async function () {
         try {
             const requestOptions = {
@@ -401,13 +405,110 @@ $(document).ready(async function () {
         }
 
     })
-    $('#btn_favourite').click(function () { })
-    $('#btn_ban').click(function () { })
-
-
-    $(document.body).on('click', '.item_library', function () {
-        let value = $(this).attr('element')
+    $(document.body).on('click', '.song_play', function () {
+        stop()
+        songActual = $(this).attr('id')
+        play()
     })
+
+    $('#btn_repeat').click(function () {
+    })
+    $('#btn_shuffle').click(function () {
+    })
+    $('#btn_search').click(async function () {
+
+        const requestOptions = {
+            method: "GET",
+            redirect: "follow"
+        };
+
+        let response = await fetch("/api/files/getFilesAndFilters?find=" + $('#input_search').val(), requestOptions)
+        let data = await response.json()
+
+        handSomeData = formatDataData(data.data)
+        hot.updateSettings({
+            data: handSomeData
+        });
+
+    })
+    $('#input_search').change(async function () {
+        const requestOptions = {
+            method: "GET",
+            redirect: "follow"
+        };
+
+        let response = await fetch("/api/files/getFilesAndFilters?find=" + $('#input_search').val(), requestOptions)
+        let data = await response.json()
+
+        handSomeData = formatDataData(data.data)
+        hot.updateSettings({
+            data: handSomeData
+        });
+    })
+    $('#btn_add_library').click(function () {
+    })
+    $('#btn_add_firend').click(function () {
+    })
+    $('#btn_share_library').click(function () {
+    })
+    $('#btn_add_playlist').click(function () {
+    })
+    $('#btn_add_folder').click(function () {
+    })
+    $('#btn_back').click(function () {
+    })
+    $('#btn_next_songs').click(function () {
+    })
+    $('#btn_view_list').click(function () {
+    })
+    $('#btn_view_icons').click(function () {
+    })
+    $('#btn_configure').click(function () {
+    })
+
+    $('#btn_favourite').click(function () {
+    })
+    $('#btn_ban').click(function () {
+    })
+
+
+    $(document.body).on('click', '.item_library', async function () {
+        let value = $(this).attr('element')
+        if (value == 'music') {
+
+            const requestOptions = {
+                method: "GET",
+                redirect: "follow"
+            };
+
+            let response = await fetch("/api/files/getFilesAndFilters?music=true", requestOptions)
+            let data = await response.json()
+
+            handSomeData = formatDataData(data.data)
+            hot.updateSettings({
+                data: handSomeData
+            });
+
+        }
+        if (value == 'videos') {
+
+            const requestOptions = {
+                method: "GET",
+                redirect: "follow"
+            };
+
+            let response = await fetch("/api/files/getFilesAndFilters?videos=true", requestOptions)
+            let data = await response.json()
+            console.log('* * * * ** * *', data)
+            handSomeData = formatDataData(data.data)
+            hot.updateSettings({
+                data: handSomeData
+            });
+
+        }
+    })
+
+
     $(document.body).on('click', '.item_friends', function () {
         let value = $(this).attr('element')
         let online = $(this).attr('online')
@@ -418,14 +519,6 @@ $(document).ready(async function () {
     $(document.body).on('click', '.item_folder', function () {
         let value = $(this).attr('element')
     })
-
-    $(document.body).on('click', '.song_play', function () {
-        stop()
-        songActual = $(this).attr('id')
-        play()
-    })
-
-
 
 
 })

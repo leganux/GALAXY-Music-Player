@@ -5,13 +5,15 @@ const moment = require('moment')
 const os = require('os')
 const ffmpeg = require('fluent-ffmpeg');
 const nodeID3 = require('node-id3');
+const {Op} = require('sequelize');
+const sequelize = require('sequelize');
 
 const mime = require('mime-types');
 
 const userFolder = os.homedir();
 
 let ms = require('../../helpers/apiato.helper.js')
-let { allowed_files } = require('../../config/general.config.js')
+let {allowed_files} = require('../../config/general.config.js')
 
 let validationObject = {}
 
@@ -25,10 +27,12 @@ let aggregate_pipeline_dt = []
 let aggregate_pipeline = []
 
 const filesModel = require('./filefolder.model.js');
-const { existsSync } = require('fs');
+const {existsSync} = require('fs');
+const objectValidatorHelper = require("apiato/sql/validator");
 
 let total = 0
 let current = 0
+
 async function scanFilesRecursive(folderPath, fileExtensions, depth = 0) {
     try {
         if (depth > 4) {
@@ -84,7 +88,7 @@ async function scanFilesRecursive(folderPath, fileExtensions, depth = 0) {
                     })
 
                     if (metadata) {
-                        foundFiles.push({ filePath, metadata });
+                        foundFiles.push({filePath, metadata});
                         SaveFile = {
                             title: metadata.title || metadata.name || fileName,
                             path: filePath,
@@ -125,7 +129,6 @@ async function scanFilesRecursive(folderPath, fileExtensions, depth = 0) {
                         await filesModel.create(SaveFile)
                     } else {
                         await filesModelupdate(
-
                             SaveFile,
 
                             {
@@ -178,8 +181,6 @@ async function extractMetadata(filePath) {
 }
 
 
-
-
 module.exports = {
 
     createOne: ms.createOne(filesModel, validationObject, populationObject, options),
@@ -198,9 +199,145 @@ module.exports = {
     datatable_aggregate: ms.datatable_aggregate(filesModel, aggregate_pipeline_dt, ''),
     aggregate: ms.updateById(filesModel, aggregate_pipeline, options),
 
-    getFilesFromFolder: async function (req, res) {
+    getFilesAndFilters: async function (req, res) {
         try {
 
+            let response = {
+                error: '',
+                success: false,
+                message: '',
+                code: 0,
+                data: {}
+            };
+
+            try {
+
+
+                let {
+                    find,
+                    attributes,
+                    limit,
+                    offset,
+                    liked,
+                    banned,
+                    sort,
+                    gender,
+                    artist,
+                    album,
+                    folder,
+                    column,
+                    music, videos
+                } = req.query;
+
+                if (column) {
+                    let conditions_ = {
+                        attributes: [[sequelize.literal('DISTINCT `' + column.data + '`'), 'distinct_column']], // Get distinct values from 'column_name'
+                    };
+                    let response_ = await filesModel.findAll(conditions_)
+                    response.error = {}
+                    response.success = true
+                    response.message = 'ok'
+                    response.code = 200
+                    response.data = response_
+                    res.status(200).json(response)
+                    return
+                }
+
+
+                let conditions = {
+                    where: {}
+                };
+
+
+                if (find) {
+                    conditions.where = {
+                        [Op.or]: [
+                            {artist: {[Op.like]: '%' + find + '%'}},
+                            {title: {[Op.like]: '%' + find + '%'}},
+                            {composer: {[Op.like]: '%' + find + '%'}},
+                            {gender: {[Op.like]: '%' + find + '%'}},
+                            {album: {[Op.like]: '%' + find + '%'}},
+                        ]
+                    }
+                }
+                if (attributes) {
+                    conditions.attributes = attributes.split(',')
+                }
+                if (limit) {
+                    conditions.limit = limit
+                }
+                if (offset) {
+                    conditions.offset = offset
+                }
+                if (liked) {
+                    conditions.where.liked = liked
+                }
+                if (banned) {
+                    conditions.where.banned = banned
+                }
+                if (sort) {
+                    let order = []
+                    for (let [key, val] of Object.entries(sort)) {
+                        order.push([key, val])
+                    }
+                    conditions.order = order
+                }
+                if (gender) {
+                    conditions.where.gender = gender
+                }
+                if (artist) {
+                    conditions.where.artist = artist
+                }
+                if (album) {
+                    conditions.where.album = album
+                }
+                if (folder) {
+                    folder = decodeURIComponent(folder)
+                    conditions.where.path = {[Op.like]: '%' + folder + '%'}
+                }
+
+                if (music) {
+                    conditions.where.extension = {
+                        [Op.in]: ['.mp3', '.flac', '.ogg', '.aac', '.m4a', '.wma', '.wav']
+                    }
+                }
+                if (videos) {
+                    conditions.where.extension = {
+                        [Op.in]: ['.mp4', '.mkv', '.webm']
+                    }
+                }
+
+
+                let newElement = await filesModel.findAll(conditions)
+
+                response.error = {}
+                response.success = true
+                response.message = 'ok'
+                response.code = 200
+                response.data = newElement
+                res.status(200).json(response)
+
+            } catch (e) {
+                response.error = e
+                response.success = false
+                response.message = e
+                response.code = options && options.customErrorCode ? options.customErrorCode : 500
+                response.data = {}
+                res.status(options && options.customErrorCode ? options.customErrorCode : 500).json(response)
+                throw e
+            }
+
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({
+                success: false,
+                error: e
+            })
+        }
+    },
+
+    getFilesFromFolder: async function (req, res) {
+        try {
 
 
         } catch (error) {
@@ -213,7 +350,7 @@ module.exports = {
     },
     getFileToPlay: async function (req, res) {
         try {
-            let { uri } = req.query
+            let {uri} = req.query
             console.log('uri', uri);
             uri = decodeURIComponent(uri)
             console.log('uri', uri);
@@ -225,7 +362,6 @@ module.exports = {
                     console.error('File not found:', err);
                     return res.status(404).send('File not found');
                 }
-
 
 
                 console.log('listo');
@@ -251,7 +387,7 @@ module.exports = {
             for (let item of possibleFolders) {
                 console.log('scan this folder', path.join(userFolder, item));
 
-                arrFiles.push(... await scanFilesRecursive(path.join(userFolder, item), allowed_files))
+                arrFiles.push(...await scanFilesRecursive(path.join(userFolder, item), allowed_files))
 
             }
 

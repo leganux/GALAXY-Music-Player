@@ -50,8 +50,8 @@ const Files = sequelize.define('Files', {
         type: DataTypes.STRING,
         allowNull: true,
         defaultValue: '',
-        field: 'album',
-        customName: 'album',
+        field: 'artist',
+        customName: 'artist',
     },
     description: {
         type: DataTypes.STRING,

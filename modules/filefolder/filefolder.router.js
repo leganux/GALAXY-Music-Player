@@ -3,11 +3,10 @@ const router = express.Router()
 let fileFolderController = require('./filefolder.controller')
 
 
-
 router.post('/getFilesFolder', fileFolderController.getFilesFromFolder)
 router.post('/scanSystem', fileFolderController.scanSystem)
 router.get('/getFileToPlay', fileFolderController.getFileToPlay)
-
+router.get('/getFilesAndFilters', fileFolderController.getFilesAndFilters)
 
 
 router.post('/', fileFolderController.createOne)

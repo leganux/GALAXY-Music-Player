@@ -4,7 +4,7 @@ head
     meta(http-equiv='X-UA-Compatible' content='IE=edge')
     meta(name='viewport' content='width=device-width, initial-scale=1')
 
-    title GALAXY Music Player 
+    title GALAXY Music Player
     style.
         .highlight {
             background-color: yellow;
@@ -14,13 +14,10 @@ head
 
     include template/styles
 
-
-
-
-body 
-    .row.m-0.p-0 
-        .col-12.m-0.p-0  
-            .card 
+body
+    .row.m-0.p-0
+        .col-12.m-0.p-0
+            .card
                 .card-header
                     .row
                         .col-md-3
@@ -31,14 +28,14 @@ body
                                         button.btn.btn-circle.btn-primary.btn-sm(data-toggle="tooltip" data-placement="top" title="Previous")#btn_previous
                                             i.fa-solid.fa-backward-fast
 
-                                        button.btn.btn-circle.btn-primary.btn-sm.text-white(data-toggle="tooltip" data-placement="top" title="Play/Pause")#btn_play 
+                                        button.btn.btn-circle.btn-primary.btn-sm.text-white(data-toggle="tooltip" data-placement="top" title="Play/Pause")#btn_play
                                             i.fa-solid.fa-play
 
-                                        button.btn.btn-circle.btn-primary.btn-sm(data-toggle="tooltip" data-placement="top" title="Next")#btn_next 
+                                        button.btn.btn-circle.btn-primary.btn-sm(data-toggle="tooltip" data-placement="top" title="Next")#btn_next
                                             i.fa-solid.fa-forward-fast
                                 .col-6
                                     br
-                                    .row 
+                                    .row
                                         .col-2
                                             i.fa-solid.fa-volume-off(data-toggle="tooltip" data-placement="top" title="Mute")#btn_mute
                                         .col-8
@@ -48,47 +45,43 @@ body
 
 
                         .col-md-7.p-2
-
-
-                            .row.bg-dark.m-1.p-2 
-
+                            .row.bg-dark.p-1
                                 .col-1.pt-2
+                                    center
+                                        img(src='/cdn/logo.png' width="50px" style="border-radius:40px").img-fluid.bg-light
+                                .col-10
+                                    center
+                                        small#label_sing_playing Choose a song or press play
+                                    .row
+                                        .col-2
+                                            center
+                                                small#label_current_time 00:00
+                                        .col-8
+                                            input.form-control-range(type='range' value="0" step="1" min="0" max="100")#range_song
+                                        .col-2
+                                            center
+                                                small#label_max_time 00:00
 
+                                .col-1.p-3
                                     center
                                         i.fa-solid.fa-music
-                                .col-10
-                                    small#label_sing_playing Choose a song or press play  
-                                    .row 
-                                        .col-1
-                                            small#label_current_time 00:00
-                                        .col-10
-                                            input.form-control-range(type='range' value="0" step="1" min="0" max="100")#range_song
-                                        .col-1
-                                            small#label_max_time 00:00
-
-
-                                .col-1 
-
-
-
-
 
                         .col-md-2
                             .row.pt-2
                                 .col-12
                                     br
                                     center
-                                        button.btn.btn-circle.btn-primary.btn-sm(data-toggle="tooltip" data-placement="top" title="Repead Song")#btn_repeat 
+                                        button.btn.btn-circle.btn-primary.btn-sm(data-toggle="tooltip" data-placement="top" title="Repead Song")#btn_repeat
                                             i.fa-solid.fa-repeat
 
-                                        button.btn.btn-circle.btn-primary.btn-sm.text-white(data-toggle="tooltip" data-placement="top" title="Shuffle")#btn_shuffle 
+                                        button.btn.btn-circle.btn-primary.btn-sm.text-white(data-toggle="tooltip" data-placement="top" title="Shuffle")#btn_shuffle
                                             i.fa-solid.fa-shuffle
                 .card-body
-                    .row 
+                    .row
                         .col-md-2
-                            .card 
+                            .card
                                 .card-header.pt-2.pb-2.pr-2
-                                    .row 
+                                    .row
                                         .col-8
                                             input.bg-dark.text-white(placeholder="Search..." style="border-radius:16px;" ).text-align-center#input_search
                                         .col-4
@@ -97,42 +90,42 @@ body
                                                     small.fa-solid.fa-search
 
 
-                            br 
-                            .card 
-                                .card-header.pt-1.pb-1.pr-2 
-                                    .row 
+                            br
+                            .card
+                                .card-header.pt-1.pb-1.pr-2
+                                    .row
                                         .col-8
-                                            label.text-white Library 
+                                            label.text-white Library
                                         .col-4
                                             center
                                                 button.btn.btn-sm(data-toggle="tooltip" data-placement="top" title="Add elements to library")#btn_add_library
                                                     small.fa-solid.fa-plus
 
-                                .card-body.p-0.m-0   
-                                    div(style="max-height:100px; height:100px; min-height:100px; overflow-y:auto;").p-0.m-0 
-                                        .list-group.p-0.m-0(style='border-radius:0px') 
+                                .card-body.p-0.m-0
+                                    div(style="max-height:100px; height:100px; min-height:100px; overflow-y:auto;").p-0.m-0
+                                        .list-group.p-0.m-0(style='border-radius:0px')
                                             small.list-group-item.list-group-item-action(href='#' element="music").pb-0.pt-0.item_library
-                                                i.fa-solid.fa-music 
+                                                i.fa-solid.fa-music
                                                 |   Music
-                                            small.list-group-item.list-group-item-action(href='#' element="videos").pb-0.pt-0.item_library 
+                                            small.list-group-item.list-group-item-action(href='#' element="videos").pb-0.pt-0.item_library
                                                 i.fa-solid.fa-video
                                                 |   Videos
-                                            small.list-group-item.list-group-item-action(href='#' element="genders").pb-0.pt-0.item_library 
-                                                i.fa-solid.fa-file-audio 
+                                            small.list-group-item.list-group-item-action(href='#' element="genders").pb-0.pt-0.item_library
+                                                i.fa-solid.fa-file-audio
                                                 |   Genders
                                             small.list-group-item.list-group-item-action(href='#' element="artists").pb-0.pt-0.item_library
                                                 i.fa-solid.fa-circle-play
                                                 |   Artists
                                             small.list-group-item.list-group-item-action(href='#' element="albums").pb-0.pt-0.item_library
-                                                i.fa-solid.fa-compact-disc 
+                                                i.fa-solid.fa-compact-disc
                                                 |   Albums
 
-                            br     
-                            .card 
+                            br
+                            .card
                                 .card-header.pt-1.pb-1.pr-2
-                                    .row 
+                                    .row
                                         .col-8
-                                            label.text-white Friends 
+                                            label.text-white Friends
                                         .col-4
                                             center
                                                 button.btn.btn-sm(data-toggle="tooltip" data-placement="top" title="Add friend")#btn_add_firend
@@ -140,88 +133,88 @@ body
                                                 button.btn.btn-sm(data-toggle="tooltip" data-placement="top" title="Share my library")#btn_share_library
                                                     small.fa-solid.fa-share
 
-                                .card-body.p-0.m-0 
-                                    div(style="max-height:100px; height:100px; min-height:100px; overflow-y:auto;").p-0.m-0     
-                                        .list-group.p-0.m-0(style='border-radius:0px') 
-                                            small.list-group-item.list-group-item-action(href='#' element='1' oline='false').pb-0.pt-0.item_firends 
+                                .card-body.p-0.m-0
+                                    div(style="max-height:100px; height:100px; min-height:100px; overflow-y:auto;").p-0.m-0
+                                        .list-group.p-0.m-0(style='border-radius:0px')
+                                            small.list-group-item.list-group-item-action(href='#' element='1' oline='false').pb-0.pt-0.item_firends
                                                 small.badge.badge-danger Offline
-                                                |&nbsp;&nbsp;
+                                                | &nbsp;&nbsp;
                                                 i.fa-solid.fa-user &nbsp;
-                                                |   JaneDoe 
-                                            small.list-group-item.list-group-item-action(href='#' element='2' oline='true').pb-0.pt-0.item_firends  
+                                                |   JaneDoe
+                                            small.list-group-item.list-group-item-action(href='#' element='2' oline='true').pb-0.pt-0.item_firends
                                                 small.badge.badge-success Online
-                                                |&nbsp;&nbsp;
+                                                | &nbsp;&nbsp;
                                                 i.fa-solid.fa-user &nbsp;
-                                                |   JaneDoe 
+                                                |   JaneDoe
 
 
 
                             br
-                            .card 
-                                .card-header.pt-1.pb-1.pr-2 
-                                    .row 
+                            .card
+                                .card-header.pt-1.pb-1.pr-2
+                                    .row
                                         .col-8
-                                            label.text-white Playlists 
+                                            label.text-white Playlists
                                         .col-4
                                             center
                                                 button.btn.btn-sm(data-toggle="tooltip" data-placement="top" title="Create a playlist")#btn_add_playlist
                                                     small.fa-solid.fa-plus
 
-                                .card-body.p-0.m-0      
-                                    div(style="max-height:100px; height:100px; min-height:100px; overflow-y:auto;").p-0.m-0    
-                                        .list-group.p-0.m-0(style='border-radius:0px') 
-                                            small.list-group-item.list-group-item-action(href='#' element="id").pb-0.pt-0.item_playlist 
+                                .card-body.p-0.m-0
+                                    div(style="max-height:100px; height:100px; min-height:100px; overflow-y:auto;").p-0.m-0
+                                        .list-group.p-0.m-0(style='border-radius:0px')
+                                            small.list-group-item.list-group-item-action(href='#' element="id").pb-0.pt-0.item_playlist
                                                 i.fa-solid.fa-file-audio &nbsp;
                                                 | Playlist1
-                                            small.list-group-item.list-group-item-action(href='#' element="id" ).pb-0.pt-0.item_playlist  
+                                            small.list-group-item.list-group-item-action(href='#' element="id" ).pb-0.pt-0.item_playlist
                                                 i.fa-solid.fa-file-audio &nbsp;
                                                 | Playlist1
 
                             br
-                            .card 
-                                .card-header.pt-1.pb-1.pr-2 
-                                    .row 
+                            .card
+                                .card-header.pt-1.pb-1.pr-2
+                                    .row
                                         .col-8
-                                            label.text-white Folders 
+                                            label.text-white Folders
                                         .col-4
                                             center
                                                 button.btn.btn-sm(data-toggle="tooltip" data-placement="top" title="Add a folder")#btn_add_folder
                                                     small.fa-solid.fa-plus
 
-                                .card-body.p-0.m-0      
-                                    div(style="max-height:100px; height:100px; min-height:100px; overflow-y:auto;").p-0.m-0    
-                                        .list-group.p-0.m-0(style='border-radius:0px') 
-                                            small.list-group-item.list-group-item-action(href='#' element="path").pb-0.pt-0.item_folder   
+                                .card-body.p-0.m-0
+                                    div(style="max-height:100px; height:100px; min-height:100px; overflow-y:auto;").p-0.m-0
+                                        .list-group.p-0.m-0(style='border-radius:0px')
+                                            small.list-group-item.list-group-item-action(href='#' element="path").pb-0.pt-0.item_folder
                                                 i.fa-solid.fa-house-user &nbsp;
                                                 | Home
-                                            small.list-group-item.list-group-item-action(href='#' element="path").pb-0.pt-0.item_folder  
+                                            small.list-group-item.list-group-item-action(href='#' element="path").pb-0.pt-0.item_folder
                                                 i.fa-solid.fa-music &nbsp;
                                                 | Music
-                                            small.list-group-item.list-group-item-action(href='#' element="path").pb-0.pt-0.item_folder  
+                                            small.list-group-item.list-group-item-action(href='#' element="path").pb-0.pt-0.item_folder
                                                 i.fa-solid.fa-desktop &nbsp;
-                                                | Desktop 
-                                            small.list-group-item.list-group-item-action(href='#' element="path").pb-0.pt-0.item_folder  
+                                                | Desktop
+                                            small.list-group-item.list-group-item-action(href='#' element="path").pb-0.pt-0.item_folder
                                                 i.fa-solid.fa-film &nbsp;
                                                 | Videos
-                                            small.list-group-item.list-group-item-action(href='#' element="path").pb-0.pt-0.item_folder  
+                                            small.list-group-item.list-group-item-action(href='#' element="path").pb-0.pt-0.item_folder
                                                 i.fa-solid.fa-folder &nbsp;
                                                 | path/folder/custom
 
-                            br                                 
-                        .col-md-10.bg-dark.m-0.p-0    
-                            div(style="max-height:1000px; height:750px; min-height:700px; overflow-y:auto;").m-0.p-0 
+                            br
+                        .col-md-10.bg-dark.m-0.p-0
+                            div(style="max-height:1000px; height:750px; min-height:700px; overflow-y:auto;").m-0.p-0
 
-                                .row.bg-secondary 
+                                .row.bg-secondary
                                     .col-3
                                         center
                                             button(style="background-color:transparent; border:none; display:none; " data-toggle="tooltip" data-placement="top" title="Back").btn.text-white#btn_back
                                                 small.fa-solid.fa-caret-left
                                             button(style="background-color:transparent; border:none;  " data-toggle="tooltip" data-placement="top" title="Ask to AI wizard").btn.text-white#btn_ia
                                                 small.fa-solid.fa-hat-wizard &nbsp;
-                                                small Wizard  IA       
+                                                small Wizard  IA
                                             button(style="background-color:transparent; border:none; " data-toggle="tooltip" data-placement="top" title="Next song" ).btn.text-white#btn_next_songs
                                                 small.fa-solid.fa-list &nbsp;
-                                                small Next song 
+                                                small Next song
 
 
                                     .col-3
@@ -232,7 +225,7 @@ body
                                                 small.fa-solid.fa-bars
 
                                     .col-3
-                                        center  
+                                        center
 
 
                                     .col-3
@@ -246,28 +239,28 @@ body
                                             button(style="background-color:transparent; border:none; " data-toggle="tooltip" data-placement="top" title="Banned songs" ).btn.text-white#btn_ban
                                                 small.fa-solid.fa-ban
 
-                                .row 
+                                .row
                                     .col-12
-                                        #hot(width="100% !important;") 
+                                        #hot(width="100% !important;")
 
 
-                .card-footer 
-                    .row 
+                .card-footer
+                    .row
                         .col-md-4
-                            center 
-                                small#label_songs_count 123456 tracks ~ 14 dias 5 horas 30 minustos
+                            center
+                                small#label_songs_count
 
-
-                        .col-md-4
-                            center 
-                                small GALAXY Music Player &copy; 2024 - 
-                                    a(href="http://leganux.com" target="_blank") leganux.com    
 
                         .col-md-4
-                            center 
-                                small#label_song_path this/is/the/paht/actual.mp3
-                    .row 
-                        .col 
+                            center
+                                small GALAXY Music Player &copy; 2024 -
+                                    a(href="http://leganux.com" target="_blank") leganux.com
+
+                        .col-md-4
+                            center
+                                small#label_song_path
+                    .row
+                        .col
                             #player(style="display:none")
                                 audio( controls="true" autoplay="true")#song_player
 
