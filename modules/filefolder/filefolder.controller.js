@@ -5,7 +5,7 @@ const moment = require('moment')
 const os = require('os')
 const ffmpeg = require('fluent-ffmpeg');
 const nodeID3 = require('node-id3');
-const {Op} = require('sequelize');
+const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
 const mime = require('mime-types');
@@ -13,7 +13,7 @@ const mime = require('mime-types');
 const userFolder = os.homedir();
 
 let ms = require('../../helpers/apiato.helper.js')
-let {allowed_files} = require('../../config/general.config.js')
+let { allowed_files } = require('../../config/general.config.js')
 
 let validationObject = {}
 
@@ -27,7 +27,7 @@ let aggregate_pipeline_dt = []
 let aggregate_pipeline = []
 
 const filesModel = require('./filefolder.model.js');
-const {existsSync} = require('fs');
+const { existsSync } = require('fs');
 const objectValidatorHelper = require("apiato/sql/validator");
 
 let total = 0
@@ -88,7 +88,7 @@ async function scanFilesRecursive(folderPath, fileExtensions, depth = 0) {
                     })
 
                     if (metadata) {
-                        foundFiles.push({filePath, metadata});
+                        foundFiles.push({ filePath, metadata });
                         SaveFile = {
                             title: metadata.title || metadata.name || fileName,
                             path: filePath,
@@ -252,11 +252,11 @@ module.exports = {
                 if (find) {
                     conditions.where = {
                         [Op.or]: [
-                            {artist: {[Op.like]: '%' + find + '%'}},
-                            {title: {[Op.like]: '%' + find + '%'}},
-                            {composer: {[Op.like]: '%' + find + '%'}},
-                            {gender: {[Op.like]: '%' + find + '%'}},
-                            {album: {[Op.like]: '%' + find + '%'}},
+                            { artist: { [Op.like]: '%' + find + '%' } },
+                            { title: { [Op.like]: '%' + find + '%' } },
+                            { composer: { [Op.like]: '%' + find + '%' } },
+                            { gender: { [Op.like]: '%' + find + '%' } },
+                            { album: { [Op.like]: '%' + find + '%' } },
                         ]
                     }
                 }
@@ -270,10 +270,13 @@ module.exports = {
                     conditions.offset = offset
                 }
                 if (liked) {
-                    conditions.where.liked = liked
+                    conditions.where.liked = true
                 }
                 if (banned) {
-                    conditions.where.banned = banned
+                    conditions.where.banned = true
+
+                } else {
+                    conditions.where.banned = false
                 }
                 if (sort) {
                     let order = []
@@ -293,7 +296,7 @@ module.exports = {
                 }
                 if (folder) {
                     folder = decodeURIComponent(folder)
-                    conditions.where.path = {[Op.like]: '%' + folder + '%'}
+                    conditions.where.path = { [Op.like]: '%' + folder + '%' }
                 }
 
                 if (music) {
@@ -350,7 +353,7 @@ module.exports = {
     },
     getFileToPlay: async function (req, res) {
         try {
-            let {uri} = req.query
+            let { uri } = req.query
             console.log('uri', uri);
             uri = decodeURIComponent(uri)
             console.log('uri', uri);

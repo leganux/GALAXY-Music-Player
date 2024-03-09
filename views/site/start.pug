@@ -22,7 +22,7 @@ body
                     .row
                         .col-md-3
                             .row.pt-2
-                                .col-6
+                                .col-4
                                     br
                                     center
                                         button.btn.btn-circle.btn-primary.btn-sm(data-toggle="tooltip" data-placement="top" title="Previous")#btn_previous
@@ -33,15 +33,17 @@ body
 
                                         button.btn.btn-circle.btn-primary.btn-sm(data-toggle="tooltip" data-placement="top" title="Next")#btn_next
                                             i.fa-solid.fa-forward-fast
-                                .col-6
+                                .col-8
                                     br
                                     .row
-                                        .col-2
-                                            i.fa-solid.fa-volume-off(data-toggle="tooltip" data-placement="top" title="Mute")#btn_mute
-                                        .col-8
+                                        .col-3
+                                            center
+                                                small.fa-solid.fa-volume-off(data-toggle="tooltip" data-placement="top" title="Mute")#btn_mute
+                                        .col-6
                                             input.form-control-range(type='range' value="50" step="1" min="0" max="100")#range_volume
-                                        .col-2
-                                            i.fa-solid.fa-volume-high(data-toggle="tooltip" data-placement="top" title="Max Volume")#btn_max_volume
+                                        .col-3
+                                            center
+                                                i.fa-solid.fa-volume-high(data-toggle="tooltip" data-placement="top" title="Max Volume")#btn_max_volume
 
 
                         .col-md-7.p-2
@@ -51,7 +53,8 @@ body
                                         img(src='/cdn/logo.png' width="50px" style="border-radius:40px").img-fluid.bg-light
                                 .col-10
                                     center
-                                        small#label_sing_playing Choose a song or press play
+                                        marquee(behavior="" direction="left") 
+                                            small#label_sing_playing Choose a song or press play
                                     .row
                                         .col-2
                                             center
@@ -214,7 +217,7 @@ body
                                                 small Wizard  IA
                                             button(style="background-color:transparent; border:none; " data-toggle="tooltip" data-placement="top" title="Next song" ).btn.text-white#btn_next_songs
                                                 small.fa-solid.fa-list &nbsp;
-                                                small Next song
+                                                small#text_nex_song Next song
 
 
                                     .col-3

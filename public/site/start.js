@@ -4,6 +4,18 @@ let isPause = false
 let isStop = true
 let songActual = 0
 let handSomeData = []
+let shuffle = false
+let repeat = false
+let liked = false
+let banned = false
+let next = 1
+
+
+
+
+function randomIntFromInterval(min, max) { // min and max included 
+    return Math.floor(Math.random() * (max - min + 1) + min)
+}
 
 function convertirSegundos(segundos) {
     const dias = Math.floor(segundos / (3600 * 24));
@@ -11,7 +23,7 @@ function convertirSegundos(segundos) {
     const minutos = Math.floor((segundos % 3600) / 60);
     const segundosRestantes = segundos % 60;
 
-    return {dias, horas, minutos, segundos: segundosRestantes};
+    return { dias, horas, minutos, segundos: segundosRestantes };
 }
 
 let formatDataData = function (data) {
@@ -23,7 +35,10 @@ let formatDataData = function (data) {
         newData.push([
             item._id,
             item.path,
-            '<button id="' + index + '" class="song_details" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Song Details"  ><i class="fa-solid fa-music"></i> </button> <button id="' + index + '" class="song_play" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Play Song"  ><i class="fa-solid fa-play"></i> </button>',
+            '<span class="all_play" id="ActualPlayed_' + index + '" ><button id="' + index + '" class="song_details" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Song Details"  ><i class="fa-solid fa-music"></i> </button> ' +
+            '<button id="' + index + '" class="song_download" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Song Download"  ><i class="fa-solid fa-download"></i> </button> ' +
+            '<button id="' + index + '" class="song_play" style="border:none; background-color:transparent; " data-toggle="tooltip" data-placement="top" title="Play Song"  ><i class="fa-solid fa-play"></i> </button>' +
+            '</span',
             item.title,
             item.gender,
             item.artist,
@@ -80,6 +95,7 @@ let getFilesStart = async function () {
             columns: [
                 {},
                 {},
+                { readOnly: true },
                 {},
                 {},
                 {},
@@ -89,9 +105,8 @@ let getFilesStart = async function () {
                 {},
                 {},
                 {},
-                {},
-                {type: 'checkbox'},
-                {type: 'checkbox'}
+                { type: 'checkbox' },
+                { type: 'checkbox' }
             ],
             width: '100%',
 
@@ -107,7 +122,7 @@ let getFilesStart = async function () {
                 }
             },
             contextMenu: contextMenu,
-            afterChange: function (changes, source) {
+            afterChange: async function (changes, source) {
                 console.log(source);
                 if (!changes) {
                     return
@@ -117,9 +132,35 @@ let getFilesStart = async function () {
                 // Se ejecuta cuando se realiza un cambio en una celda
                 console.log('Cambio realizado:', changes);
 
-                changes.forEach(([row, prop, oldValue, newValue]) => {
+                changes.forEach(async ([row, prop, oldValue, newValue]) => {
                     if (hot) {
                         console.log('Fila cambiada:', hot.getSourceDataAtRow(row));
+                        let data = hot.getSourceDataAtRow(row)
+                        let changes = {
+                            title: data[3],
+                            gender: data[4],
+                            artist: data[5],
+                            album: data[6],
+                            description: data[7],
+                            tags: data[8],
+                            composer: data[9],
+                            track: data[10],
+                            publisher: data[11],
+                            liked: data[12],
+                            banned: data[13],
+                        }
+                        let id = data[0]
+                        const options = {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(changes)
+                        };
+
+                        await fetch('/api/files/' + id, options)
+
+
                     }
 
                 });
@@ -143,7 +184,6 @@ let getFilesStart = async function () {
 
 }
 
-
 var customColHeaders = [
     "_id",
     "path",
@@ -160,6 +200,7 @@ var customColHeaders = [
     "Liked",
     "Banned",
 ];
+
 
 var contextMenu = {
     items: {
@@ -290,8 +331,21 @@ function play() {
         $('#btn_play').find('i').removeClass('fa-play')
         $('#btn_play').find('i').addClass('fa-pause')
     } else if (isStop) {
+        if (repeat) {
+            next = songActual
+        } else {
+            if (!shuffle) {
+                next = Number(songActual) + 1
+            } else {
+                let total = handSomeData.length - 1
+                next = randomIntFromInterval(1, total)
+            }
+        }
         let data = hot.getSourceDataAtRow(songActual)
-        console.log(data);
+        console.log(next);
+        let dataNext = hot.getSourceDataAtRow(next)
+        console.log(dataNext, 'dataNext');
+        $('#text_nex_song').text(dataNext[3].length < 20 ? dataNext[3] : dataNext[3].substring(0, 20) + '...')
         if (!data) {
             isPlay = true
             isPause = false
@@ -300,13 +354,14 @@ function play() {
             $('#btn_play').find('i').addClass('fa-play')
             return
         }
-        $('#label_sing_playing').text(data[3])
+        $('#label_sing_playing').text(data[3] + ' - ' + data[4] + ' - ' + data[5])
         $('#label_song_path').text(data[1])
         $('#song_player').html('<source src="' + '/api/files/getFileToPlay?uri=' + encodeURIComponent(data[1]) + '" type="audio/ogg" id="audioSource_">')
         audio.load();
         audio.currentTime = 0;
         $('#btn_play').find('i').removeClass('fa-play')
         $('#btn_play').find('i').addClass('fa-pause')
+
     }
     audio.play()
     higligthRow(songActual)
@@ -317,12 +372,12 @@ function play() {
 }
 
 function higligthRow(row) {
-    $(hot.table).find('tbody tr td').removeClass('bg-dark');
-    $(hot.table).find('tbody tr td').removeClass('text-white');
+    $('.all_play').removeClass('bg-success');
+    $('.all_play').removeClass('text-white');
 
     // Añadir la clase de resaltado a la fila específica
-    $(hot.table).find('tbody tr:eq(' + row + ') td').addClass('bg-dark');
-    $(hot.table).find('tbody tr:eq(' + row + ') td').addClass('text-white');
+    $('#ActualPlayed_' + row).addClass('bg-success');
+    $('#ActualPlayed_' + row).addClass('text-white');
 }
 
 $(document).ready(async function () {
@@ -335,10 +390,10 @@ $(document).ready(async function () {
         $('#label_max_time').text(audioFormat(audio.duration));
     });
 
-    // Update position slider and stop audio when it ends
+
     audio.addEventListener('ended', function () {
         stop()
-        songActual++
+        songActual = next
         play()
 
     });
@@ -353,11 +408,13 @@ $(document).ready(async function () {
 
     $('#btn_previous').click(function () {
         stop()
-        songActual--
+        songActual = next - 2
         play()
     })
     $('#btn_play').click(function () {
+
         if (!isPlay) {
+
             play()
         } else {
             pause()
@@ -366,7 +423,7 @@ $(document).ready(async function () {
     })
     $('#btn_next').click(function () {
         stop()
-        songActual++
+        songActual = next
         play()
     })
     $('#btn_mute').click(function () {
@@ -410,13 +467,41 @@ $(document).ready(async function () {
         songActual = $(this).attr('id')
         play()
     })
+    $(document.body).on('click', '.song_download', function () {
+        songActual = $(this).attr('id')
+        let data = hot.getSourceDataAtRow(songActual)
+        window.open('/api/files/getFileToPlay?uri=' + encodeURIComponent(data[1]))
+    })
 
     $('#btn_repeat').click(function () {
+        if (repeat) {
+            $('#btn_repeat').removeClass('btn-info')
+            $('#btn_repeat').addClass('btn-dark')
+            next = songActual
+        } else {
+            $('#btn_repeat').removeClass('btn-dark')
+            $('#btn_repeat').addClass('btn-info')
+            next = Number(songActual) + 1
+        }
+        repeat = !repeat
     })
     $('#btn_shuffle').click(function () {
+        if (shuffle) {
+            $('#btn_shuffle').removeClass('btn-info')
+            $('#btn_shuffle').addClass('btn-dark')
+            let total = handSomeData.length - 1
+            next = randomIntFromInterval(1, total)
+
+        } else {
+            $('#btn_shuffle').removeClass('btn-dark')
+            $('#btn_shuffle').addClass('btn-info')
+            next = Number(songActual) + 1
+
+        }
+        shuffle = !shuffle
     })
     $('#btn_search').click(async function () {
-
+        HoldOn.open()
         const requestOptions = {
             method: "GET",
             redirect: "follow"
@@ -429,9 +514,12 @@ $(document).ready(async function () {
         hot.updateSettings({
             data: handSomeData
         });
-
+        HoldOn.close()
+        $('#btn_ban').removeClass('text-info')
+        $('#btn_favourite').removeClass('text-info')
     })
     $('#input_search').change(async function () {
+        HoldOn.open()
         const requestOptions = {
             method: "GET",
             redirect: "follow"
@@ -444,6 +532,8 @@ $(document).ready(async function () {
         hot.updateSettings({
             data: handSomeData
         });
+        HoldOn.close()
+
     })
     $('#btn_add_library').click(function () {
     })
@@ -466,14 +556,66 @@ $(document).ready(async function () {
     $('#btn_configure').click(function () {
     })
 
-    $('#btn_favourite').click(function () {
+    $('#btn_ban').removeClass('text-info')
+    $('#btn_favourite').removeClass('text-info')
+
+    $('#btn_favourite').click(async function () {
+        HoldOn.open()
+        const requestOptions = {
+            method: "GET",
+            redirect: "follow"
+        };
+        let uri
+        if (liked) {
+            uri = "/api/files/getFilesAndFilters"
+            $('#btn_favourite').removeClass('text-info')
+        } else {
+            $('#btn_favourite').addClass('text-info')
+            $('#btn_ban').removeClass('text-info')
+            uri = "/api/files/getFilesAndFilters?liked=true"
+        }
+        let response = await fetch(uri, requestOptions)
+        let data = await response.json()
+
+        handSomeData = formatDataData(data.data)
+        hot.updateSettings({
+            data: handSomeData
+        });
+        HoldOn.close()
+        liked = !liked
     })
-    $('#btn_ban').click(function () {
+    $('#btn_ban').click(async function () {
+        HoldOn.open()
+        const requestOptions = {
+            method: "GET",
+            redirect: "follow"
+        };
+
+        let uri
+        if (banned) {
+            uri = "/api/files/getFilesAndFilters"
+            $('#btn_ban').removeClass('text-info')
+        } else {
+            $('#btn_ban').addClass('text-info')
+            $('#btn_favourite').removeClass('text-info')
+            uri = "/api/files/getFilesAndFilters?banned=true"
+        }
+
+        let response = await fetch(uri, requestOptions)
+        let data = await response.json()
+
+        handSomeData = formatDataData(data.data)
+        hot.updateSettings({
+            data: handSomeData
+        });
+        HoldOn.close()
+        banned = !banned
     })
 
 
     $(document.body).on('click', '.item_library', async function () {
         let value = $(this).attr('element')
+        HoldOn.open()
         if (value == 'music') {
 
             const requestOptions = {
@@ -490,6 +632,7 @@ $(document).ready(async function () {
             });
 
         }
+
         if (value == 'videos') {
 
             const requestOptions = {
@@ -506,6 +649,7 @@ $(document).ready(async function () {
             });
 
         }
+        HoldOn.close()
     })
 
 
