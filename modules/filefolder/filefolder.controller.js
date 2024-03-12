@@ -93,7 +93,7 @@ async function scanFilesRecursive(folderPath, fileExtensions, depth = 0) {
                             title: metadata.title || metadata.name || fileName,
                             path: filePath,
                             gender: metadata.genre || metadata.gender || 'Unclasified',
-                            album: metadata.album || metadata.title || '',
+                            album: metadata.album || metadata.title || metadata.album_artist || '',
                             date: metadata.originalYear || metadata.year || metadata.date || metadata.creation_time || 'Unclasified',
                             artist: metadata.artist || metadata.album_artist || 'Unclasified',
                             description: metadata.description || metadata.label || 'Unclasified',
@@ -248,6 +248,9 @@ module.exports = {
                     where: {}
                 };
 
+                if (liked) {
+                    conditions.where.liked = true
+                }
 
                 if (find) {
                     conditions.where = {
@@ -263,15 +266,8 @@ module.exports = {
                 if (attributes) {
                     conditions.attributes = attributes.split(',')
                 }
-                if (limit) {
-                    conditions.limit = limit
-                }
-                if (offset) {
-                    conditions.offset = offset
-                }
-                if (liked) {
-                    conditions.where.liked = true
-                }
+
+
                 if (banned) {
                     conditions.where.banned = true
 
@@ -312,12 +308,23 @@ module.exports = {
 
 
                 let newElement = await filesModel.findAll(conditions)
+                let total = newElement.length
+
+                if (offset) {
+                    conditions.offset = offset
+                }
+                if (limit) {
+                    conditions.limit = limit
+                }
+
+                newElement = await filesModel.findAll(conditions)
 
                 response.error = {}
                 response.success = true
                 response.message = 'ok'
                 response.code = 200
                 response.data = newElement
+                response.total = total
                 res.status(200).json(response)
 
             } catch (e) {

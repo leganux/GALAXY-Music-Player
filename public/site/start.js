@@ -10,8 +10,15 @@ let liked = false
 let banned = false
 let next = 1
 
+let page = 1
+let limit = 1000
+let offset = (page * limit) - limit
+let pageNumbers = 0
+let query = ''
 
-
+let calcule_page = function () {
+    offset = (page * limit) - limit
+}
 
 function randomIntFromInterval(min, max) { // min and max included 
     return Math.floor(Math.random() * (max - min + 1) + min)
@@ -54,6 +61,7 @@ let formatDataData = function (data) {
         index++
 
 
+
     }
     return newData
 }
@@ -65,17 +73,30 @@ let getFilesStart = async function () {
             redirect: "follow"
         };
         HoldOn.open()
-        let response = await fetch("/api/files/", requestOptions)
+
+        page = 1
+        calcule_page()
+        let response = await fetch("/api/files/getFilesAndFilters?offset=" + offset + '&limit=' + limit, requestOptions)
         let data = await response.json()
         HoldOn.close()
+        $('#table_space').show()
+        $('#player').hide()
 
+        query = "?limit=LIMIT&offset=OFFSET"
+
+        pageNumbers = data.total / limit
+
+        $('#sp_buttons').html('')
+        for (let i = 0; i < pageNumbers; i++) {
+            $('#sp_buttons').append('<button class="btn btn-sm btn-dark ActionPageNumber " value=' + (i + 1) + '>' + (i + 1) + '</button>')
+        }
 
         if (data.data.length == 0) {
             $('#btn_scan_music').click()
             return
         }
 
-        let length = data.data.length
+        let length = data.total
         let time = length * 220
         let times = convertirSegundos(time)
         $('#label_songs_count').text(length + ' tracks ~ ' + times.dias + ' days ' + times.horas + ' hours ' + times.minutos + ' minutes')
@@ -343,9 +364,7 @@ function play() {
         }
         let data = hot.getSourceDataAtRow(songActual)
         console.log(next);
-        let dataNext = hot.getSourceDataAtRow(next)
-        console.log(dataNext, 'dataNext');
-        $('#text_nex_song').text(dataNext[3].length < 20 ? dataNext[3] : dataNext[3].substring(0, 20) + '...')
+
         if (!data) {
             isPlay = true
             isPause = false
@@ -361,6 +380,20 @@ function play() {
         audio.currentTime = 0;
         $('#btn_play').find('i').removeClass('fa-play')
         $('#btn_play').find('i').addClass('fa-pause')
+        if (data[1]?.toLowerCase()?.endsWith('.mp4')) {
+            $('#table_space').hide()
+            $('#player').show()
+        } else {
+            $('#table_space').show()
+            $('#player').hide()
+        }
+
+        let dataNext = hot.getSourceDataAtRow(next)
+        if (!dataNext) {
+            return
+        }
+        console.log(dataNext, 'dataNext');
+        $('#text_nex_song').text(dataNext[3].length < 20 ? dataNext[3] : dataNext[3].substring(0, 20) + '...')
 
     }
     audio.play()
@@ -507,8 +540,19 @@ $(document).ready(async function () {
             redirect: "follow"
         };
 
-        let response = await fetch("/api/files/getFilesAndFilters?find=" + $('#input_search').val(), requestOptions)
+        page = 1
+        calcule_page()
+        let response = await fetch("/api/files/getFilesAndFilters?find=" + $('#input_search').val() + '&limit=' + limit + '&offset=' + offset, requestOptions)
         let data = await response.json()
+        query = "?find=" + $('#input_search').val() + "&limit=LIMIT&offset=OFFSET"
+        $('#table_space').show()
+        $('#player').hide()
+        $('#sp_buttons').html('')
+
+        pageNumbers = data.total / limit
+        for (let i = 0; i < pageNumbers; i++) {
+            $('#sp_buttons').append('<button class="btn btn-sm btn-dark ActionPageNumber " value=' + (i + 1) + '>' + (i + 1) + '</button>')
+        }
 
         handSomeData = formatDataData(data.data)
         hot.updateSettings({
@@ -525,15 +569,26 @@ $(document).ready(async function () {
             redirect: "follow"
         };
 
-        let response = await fetch("/api/files/getFilesAndFilters?find=" + $('#input_search').val(), requestOptions)
+        page = 1
+        calcule_page()
+        let response = await fetch("/api/files/getFilesAndFilters?find=" + $('#input_search').val() + '&limit=' + limit + '&offset=' + offset, requestOptions)
         let data = await response.json()
+        query = "?find=" + $('#input_search').val() + "&limit=LIMIT&offset=OFFSET"
+        $('#sp_buttons').html('')
+        $('#table_space').show()
+        $('#player').hide()
+        pageNumbers = data.total / limit
+        for (let i = 0; i < pageNumbers; i++) {
+            $('#sp_buttons').append('<button class="btn btn-sm btn-dark ActionPageNumber " value=' + (i + 1) + '>' + (i + 1) + '</button>')
+        }
 
         handSomeData = formatDataData(data.data)
         hot.updateSettings({
             data: handSomeData
         });
         HoldOn.close()
-
+        $('#btn_ban').removeClass('text-info')
+        $('#btn_favourite').removeClass('text-info')
     })
     $('#btn_add_library').click(function () {
     })
@@ -565,17 +620,31 @@ $(document).ready(async function () {
             method: "GET",
             redirect: "follow"
         };
-        let uri
+        page = 1
+        calcule_page()
         if (liked) {
-            uri = "/api/files/getFilesAndFilters"
+            uri = "/api/files/getFilesAndFilters?limit=" + limit + '&offset=' + offset
             $('#btn_favourite').removeClass('text-info')
+            query = "?limit=LIMIT&offset=OFFSET"
+            $('#table_space').show()
+            $('#player').hide()
         } else {
             $('#btn_favourite').addClass('text-info')
             $('#btn_ban').removeClass('text-info')
-            uri = "/api/files/getFilesAndFilters?liked=true"
+            uri = "/api/files/getFilesAndFilters?liked=true&limit=" + limit + '&offset=' + offset
+            query = "?liked=true&limit=LIMIT&offset=OFFSET"
+            $('#table_space').show()
+            $('#player').hide()
         }
         let response = await fetch(uri, requestOptions)
         let data = await response.json()
+
+        pageNumbers = data.total / limit
+
+        $('#sp_buttons').html('')
+        for (let i = 0; i < pageNumbers; i++) {
+            $('#sp_buttons').append('<button class="btn btn-sm btn-dark ActionPageNumber " value=' + (i + 1) + '>' + (i + 1) + '</button>')
+        }
 
         handSomeData = formatDataData(data.data)
         hot.updateSettings({
@@ -592,17 +661,32 @@ $(document).ready(async function () {
         };
 
         let uri
+        page = 1
+        calcule_page()
         if (banned) {
-            uri = "/api/files/getFilesAndFilters"
+            uri = "/api/files/getFilesAndFilters?limit=" + limit + '&offset=' + offset
             $('#btn_ban').removeClass('text-info')
+            query = "?videos=true&limit=LIMIT&offset=OFFSET"
+            $('#table_space').show()
+            $('#player').hide()
         } else {
             $('#btn_ban').addClass('text-info')
             $('#btn_favourite').removeClass('text-info')
-            uri = "/api/files/getFilesAndFilters?banned=true"
+            uri = "/api/files/getFilesAndFilters?banned=true&limit=" + limit + '&offset=' + offset
+            query = "?banned=true&limit=LIMIT&offset=OFFSET"
+            $('#table_space').show()
+            $('#player').hide()
         }
 
         let response = await fetch(uri, requestOptions)
         let data = await response.json()
+
+        pageNumbers = data.total / limit
+
+        $('#sp_buttons').html('')
+        for (let i = 0; i < pageNumbers; i++) {
+            $('#sp_buttons').append('<button class="btn btn-sm btn-dark ActionPageNumber " value=' + (i + 1) + '>' + (i + 1) + '</button>')
+        }
 
         handSomeData = formatDataData(data.data)
         hot.updateSettings({
@@ -622,9 +706,21 @@ $(document).ready(async function () {
                 method: "GET",
                 redirect: "follow"
             };
+            page = 1
+            calcule_page()
 
-            let response = await fetch("/api/files/getFilesAndFilters?music=true", requestOptions)
+            let response = await fetch("/api/files/getFilesAndFilters?music=true&limit=" + limit + '&offset=' + offset, requestOptions)
             let data = await response.json()
+            query = "?music=true&limit=LIMIT&offset=OFFSET"
+            $('#table_space').show()
+            $('#player').hide()
+
+            pageNumbers = data.total / limit
+
+            $('#sp_buttons').html('')
+            for (let i = 0; i < pageNumbers; i++) {
+                $('#sp_buttons').append('<button class="btn btn-sm btn-dark ActionPageNumber " value=' + (i + 1) + '>' + (i + 1) + '</button>')
+            }
 
             handSomeData = formatDataData(data.data)
             hot.updateSettings({
@@ -640,8 +736,23 @@ $(document).ready(async function () {
                 redirect: "follow"
             };
 
-            let response = await fetch("/api/files/getFilesAndFilters?videos=true", requestOptions)
+            page = 1
+            calcule_page()
+
+            let response = await fetch("/api/files/getFilesAndFilters?videos=true&limit=" + limit + '&offset=' + offset, requestOptions)
             let data = await response.json()
+            query = "?videos=true&limit=LIMIT&offset=OFFSET"
+            $('#table_space').show()
+            $('#player').hide()
+
+            pageNumbers = data.total / limit
+
+            $('#sp_buttons').html('')
+            for (let i = 0; i < pageNumbers; i++) {
+                $('#sp_buttons').append('<button class="btn btn-sm btn-dark ActionPageNumber " value=' + (i + 1) + '>' + (i + 1) + '</button>')
+            }
+
+
             console.log('* * * * ** * *', data)
             handSomeData = formatDataData(data.data)
             hot.updateSettings({
@@ -662,6 +773,30 @@ $(document).ready(async function () {
     })
     $(document.body).on('click', '.item_folder', function () {
         let value = $(this).attr('element')
+    })
+
+
+    $(document.body).on('click', '.ActionPageNumber', async function () {
+        HoldOn.open()
+        page = $(this).val()
+        calcule_page()
+
+        const requestOptions = {
+            method: "GET",
+            redirect: "follow"
+        };
+
+        let nQuery = query.replaceAll('LIMIT', limit)
+        nQuery = nQuery.replaceAll('OFFSET', offset)
+        let response = await fetch("/api/files/getFilesAndFilters" + nQuery, requestOptions)
+        $('#table_space').show()
+        $('#player').hide()
+        let data = await response.json()
+        handSomeData = formatDataData(data.data)
+        hot.updateSettings({
+            data: handSomeData
+        });
+        HoldOn.close()
     })
 
 

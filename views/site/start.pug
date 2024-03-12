@@ -220,14 +220,17 @@ body
                                                 small#text_nex_song Next song
 
 
-                                    .col-3
-                                        center
+                                    .col-6
+
+
+
+                                        //center
                                             button(style="background-color:transparent; border:none; " data-toggle="tooltip" data-placement="top" title="View as list").btn.text-white#btn_view_list
                                                 small.fa-solid.fa-table-cells-large
                                             button(style="background-color:transparent; border:none; " data-toggle="tooltip" data-placement="top" title="View as icons" ).btn.text-white#btn_view_icons
                                                 small.fa-solid.fa-bars
 
-                                    .col-3
+                                    //.col-3
                                         center
 
 
@@ -244,7 +247,14 @@ body
 
                                 .row
                                     .col-12
-                                        #hot(width="100% !important;")
+                                        #table_space
+                                            #hot(width="100% !important;")
+                                        #player(style="display:none" )
+                                            center
+                                                video( controls="true" width="100%" autoplay="true" style="min-height:300px;")#song_player
+                            .row 
+                                .col-12 
+                                    center#sp_buttons        
 
 
                 .card-footer
@@ -252,6 +262,9 @@ body
                         .col-md-4
                             center
                                 small#label_songs_count
+                                br
+                                small
+                                    a(href="https://github.com/leganux/GALAXY-Music-Player/fork" target="_blank" ) Fork project at github
 
 
                         .col-md-4
@@ -262,10 +275,10 @@ body
                         .col-md-4
                             center
                                 small#label_song_path
+
                     .row
                         .col
-                            #player(style="display:none")
-                                audio( controls="true" autoplay="true")#song_player
+
 
 
 
